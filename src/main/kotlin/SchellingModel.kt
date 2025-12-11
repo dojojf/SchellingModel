@@ -1,135 +1,124 @@
-import kotlin.math.sqrt
 import kotlin.random.Random
 
-data class Cell(val row: Int, val col: Int, var community: Int?)
-
-class SchellingModel(
-    private val size: Int,
-    private val emptyPercentage: Double = 0.2,
-    private val minSimilarity: Double = 0.5,
-    private val maxIterations: Int = 1000,
-    private val randomSeed: Long = System.currentTimeMillis()
-) {
-    private val grid: Array<Array<Cell>>
-    private val random = Random(randomSeed)
-    private var iterations = 0
+class SchellingModel(private val size: Int, private val similarityThreshold: Double, private val freePercentage: Double = 0.2) {
+    private var grid: Array<IntArray>
+    private val empty = 0
+    private val communityA = 1
+    private val communityB = 2
+    private var freeCells: MutableList<Pair<Int, Int>> = mutableListOf()
 
     init {
-        require(size > 0) { "Size must be positive" }
-        require(emptyPercentage in 0.0..1.0) { "Empty percentage must be between 0 and 1" }
-        grid = Array(size) { row ->
-            Array(size) { col ->
-                Cell(row, col, null)
-            }
-        }
+        require(size > 0) { "Grid size must be positive" }
+        require(similarityThreshold in 0.0..1.0) { "Similarity threshold must be between 0 and 1" }
+        grid = Array(size) { IntArray(size) }
         initializeGrid()
     }
 
     private fun initializeGrid() {
         val totalCells = size * size
-        val emptyCells = (totalCells * emptyPercentage).toInt()
-        val communitySize = (totalCells - emptyCells) / 2
+        val communitySize = (totalCells * (1 - freePercentage) / 2).toInt()
+        val freeCellsCount = (totalCells * freePercentage).toInt()
 
-        // Remplir avec deux communautés
-        repeat(communitySize) {
-            placeRandomCell(0)
-            placeRandomCell(1)
-        }
-    }
+        // Remplit la grille avec les communautés et les cases vides
+        val cells = mutableListOf<Int>().apply {
+            addAll(List(communitySize) { communityA })
+            addAll(List(communitySize) { communityB })
+            addAll(List(freeCellsCount) { empty })
+        }.shuffled()
 
-    private fun placeRandomCell(community: Int) {
-        while (true) {
-            val row = random.nextInt(size)
-            val col = random.nextInt(size)
-            if (grid[row][col].community == null) {
-                grid[row][col].community = community
-                break
-            }
-        }
-    }
-
-    fun iterate(): Boolean {
-        iterations++
-        var moved = false
-        for (row in 0 until size) {
-            for (col in 0 until size) {
-                val cell = grid[row][col]
-                if (cell.community != null && !isSatisfied(cell)) {
-                    val emptyCells = getEmptyCells()
-                    if (emptyCells.isNotEmpty()) {
-                        val newCell = emptyCells.random(random)
-                        grid[newCell.row][newCell.col].community = cell.community
-                        cell.community = null
-                        moved = true
-                    }
+        for (i in 0 until size) {
+            for (j in 0 until size) {
+                grid[i][j] = cells[i * size + j]
+                if (grid[i][j] == empty) {
+                    freeCells.add(Pair(i, j))
                 }
             }
         }
-        return moved
     }
 
-    private fun isSatisfied(cell: Cell): Boolean {
-        val neighbors = getNeighbors(cell)
-        if (neighbors.isEmpty()) return true
-        val sameCommunity = neighbors.count { it.community == cell.community }
-        return sameCommunity.toDouble() / neighbors.size >= minSimilarity
+    private fun isSatisfied(x: Int, y: Int): Boolean {
+        val current = grid[x][y]
+        if (current == empty) return true
+
+        val neighbors = getNeighbors(x, y)
+        val sameCommunity = neighbors.count { grid[it.first][it.second] == current }
+        val totalNeighbors = neighbors.size
+
+        return if (totalNeighbors == 0) true else sameCommunity.toDouble() / totalNeighbors >= similarityThreshold
     }
 
-    private fun getNeighbors(cell: Cell): List<Cell> {
-        val neighbors = mutableListOf<Cell>()
-        for (dr in -1..1) {
-            for (dc in -1..1) {
-                if (dr == 0 && dc == 0) continue
-                if (dr != 0 && dc != 0) continue // Orthogonal only
-                val nr = cell.row + dr
-                val nc = cell.col + dc
-                if (nr in 0 until size && nc in 0 until size) {
-                    grid[nr][nc].community?.let { neighbors.add(grid[nr][nc]) }
+    private fun getNeighbors(x: Int, y: Int): List<Pair<Int, Int>> {
+        val neighbors = mutableListOf<Pair<Int, Int>>()
+        for (i in maxOf(x - 1, 0)..minOf(x + 1, size - 1)) {
+            for (j in maxOf(y - 1, 0)..minOf(y + 1, size - 1)) {
+                if (i != x || j != y) {
+                    neighbors.add(Pair(i, j))
                 }
             }
         }
         return neighbors
     }
 
-    private fun getEmptyCells(): List<Cell> {
-        return grid.flatMap { it.asList() }.filter { it.community == null }
+    fun iterate(maxIterations: Int = 1000): Int {
+        var iterations = 0
+        var changed: Boolean
+
+        do {
+            changed = false
+            for (i in 0 until size) {
+                for (j in 0 until size) {
+                    if (grid[i][j] != empty && !isSatisfied(i, j)) {
+                        moveAgent(i, j)
+                        changed = true
+                    }
+                }
+            }
+            iterations++
+        } while (changed && iterations < maxIterations)
+
+        return iterations
     }
 
-    fun runUntilConvergence(): Int {
-        while (iterations < maxIterations) {
-            if (!iterate()) break
-        }
-        return iterations
+    private fun moveAgent(x: Int, y: Int) {
+        if (freeCells.isEmpty()) return
+
+        val current = grid[x][y]
+        val newPosition = freeCells.random()
+        grid[x][y] = empty
+        grid[newPosition.first][newPosition.second] = current
+        freeCells.remove(newPosition)
+        freeCells.add(Pair(x, y))
+    }
+
+    fun getGrid(): Array<IntArray> {
+        return grid.copyOf()
     }
 
     fun countGroups(): Int {
         val visited = Array(size) { BooleanArray(size) }
         var groupCount = 0
-        for (row in 0 until size) {
-            for (col in 0 until size) {
-                if (grid[row][col].community != null && !visited[row][col]) {
-                    visitGroup(grid[row][col], visited)
+
+        for (i in 0 until size) {
+            for (j in 0 until size) {
+                if (grid[i][j] != empty && !visited[i][j]) {
+                    exploreGroup(i, j, visited, grid[i][j])
                     groupCount++
                 }
             }
         }
+
         return groupCount
     }
 
-    private fun visitGroup(cell: Cell, visited: Array<BooleanArray>) {
-        val queue = mutableListOf(cell)
-        visited[cell.row][cell.col] = true
-        while (queue.isNotEmpty()) {
-            val current = queue.removeAt(0)
-            for (neighbor in getNeighbors(current)) {
-                if (neighbor.community == cell.community && !visited[neighbor.row][neighbor.col]) {
-                    visited[neighbor.row][neighbor.col] = true
-                    queue.add(neighbor)
-                }
-            }
+    private fun exploreGroup(x: Int, y: Int, visited: Array<BooleanArray>, community: Int) {
+        if (x !in 0 until size || y !in 0 until size || visited[x][y] || grid[x][y] != community) {
+            return
         }
-    }
 
-    fun getGrid(): Array<Array<Cell>> = grid.copyOf()
-    fun getIterations(): Int = iterations
+        visited[x][y] = true
+        exploreGroup(x + 1, y, visited, community)
+        exploreGroup(x - 1, y, visited, community)
+        exploreGroup(x, y + 1, visited, community)
+        exploreGroup(x, y - 1, visited, community)
+    }
 }
