@@ -9,7 +9,9 @@ import javafx.scene.paint.Color
 import javafx.scene.shape.Rectangle
 import javafx.stage.Stage
 
-class SchellingView(private val model: SchellingModel) : Application() {
+class SchellingView() : Application() {
+    private val size = 20
+    private val model = SchellingModel(size = size, similarityThreshold = 0.3)
     private val cellSize = 20.0
     private lateinit var gridPane: Pane
     private lateinit var iterationsLabel: Label
@@ -29,8 +31,8 @@ class SchellingView(private val model: SchellingModel) : Application() {
         val topBox = HBox(10.0, runButton, iterationsLabel, groupsLabel)
 
         gridPane = Pane().apply {
-            prefWidth = model.getGrid().size * cellSize
-            prefHeight = model.getGrid().size * cellSize
+            prefWidth = model.getCopyOfGrid().size * cellSize
+            prefHeight = model.getCopyOfGrid().size * cellSize
         }
 
         // Mise en page
@@ -39,7 +41,7 @@ class SchellingView(private val model: SchellingModel) : Application() {
             center = gridPane
         }
 
-        stage.scene = Scene(root, 400.0, 400.0)
+        stage.scene = Scene(root, cellSize * size, cellSize * size)
         stage.show()
 
         // Dessin de la grille initiale
@@ -56,7 +58,7 @@ class SchellingView(private val model: SchellingModel) : Application() {
 
     private fun drawGrid() {
         gridPane.children.clear()
-        val grid = model.getGrid()
+        val grid = model.getCopyOfGrid()
         for (i in grid.indices) {
             for (j in grid[i].indices) {
                 val cell = Rectangle(
@@ -77,9 +79,4 @@ class SchellingView(private val model: SchellingModel) : Application() {
             }
         }
     }
-}
-
-fun main() {
-    val model = SchellingModel(size = 20, similarityThreshold = 0.5)
-    Application.launch(SchellingView::class.java, model)
 }

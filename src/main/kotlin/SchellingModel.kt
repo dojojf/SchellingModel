@@ -1,7 +1,5 @@
-import kotlin.random.Random
-
-class SchellingModel(private val size: Int, private val similarityThreshold: Double, private val freePercentage: Double = 0.2) {
-    private var grid: Array<IntArray>
+open class SchellingModel(private val size: Int, private val similarityThreshold: Double, private val freePercentage: Double = 0.2) {
+    protected var grid: Array<IntArray>
     private val empty = 0
     private val communityA = 1
     private val communityB = 2
@@ -36,7 +34,7 @@ class SchellingModel(private val size: Int, private val similarityThreshold: Dou
         }
     }
 
-    private fun isSatisfied(x: Int, y: Int): Boolean {
+    open fun isSatisfied(x: Int, y: Int): Boolean {
         val current = grid[x][y]
         if (current == empty) return true
 
@@ -90,11 +88,11 @@ class SchellingModel(private val size: Int, private val similarityThreshold: Dou
         freeCells.add(Pair(x, y))
     }
 
-    fun getGrid(): Array<IntArray> {
+    open fun getCopyOfGrid(): Array<IntArray> {
         return grid.copyOf()
     }
 
-    fun countGroups(): Int {
+    open fun countGroups(): Int {
         val visited = Array(size) { BooleanArray(size) }
         var groupCount = 0
 

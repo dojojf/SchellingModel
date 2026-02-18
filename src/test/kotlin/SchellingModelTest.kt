@@ -13,7 +13,7 @@ class SchellingModelTest {
 
     @Test
     fun `test grid initialization`() {
-        val grid = model.getGrid()
+        val grid = model.getCopyOfGrid()
         assertEquals(5, grid.size)
         // Vérifie que le nombre de cases vides est environ 20%
         val emptyCells = grid.sumOf { row -> row.count { it == 0 } }
@@ -23,15 +23,18 @@ class SchellingModelTest {
     @Test
     fun `test satisfaction with all neighbors same`() {
         // Simule une grille où tous les voisins sont identiques
-        val mockGrid = Array(5) { IntArray(5) }
+        val mockGrid = Array(6) { IntArray(5) }
         for (i in 0 until 5) {
             for (j in 0 until 5) {
                 mockGrid[i][j] = 1 // Toutes les cases sont de la communauté A
             }
         }
         // Remplace la grille pour ce test
-        model = object : SchellingModel(5, 0.5, 0.0) {
-            override fun getGrid(): Array<IntArray> = mockGrid
+        model = object : SchellingModel(6, 0.5, 0.0) {
+//            override fun getGrid(): Array<IntArray> = mockGrid
+            init {
+                grid = mockGrid
+            }
         }
         // Toute cellule doit être satisfaite
         assertTrue(model.isSatisfied(2, 2))
@@ -40,16 +43,18 @@ class SchellingModelTest {
     @Test
     fun `test satisfaction with no neighbors same`() {
         // Simule une grille où aucun voisin n'est identique
-        val mockGrid = Array(5) { IntArray(5) }
+        val mockGrid = Array(6) { IntArray(6) }
         for (i in 0 until 5) {
             for (j in 0 until 5) {
                 mockGrid[i][j] = if (i == 2 && j == 2) 1 else 2 // Centre communauté A, autres B
             }
         }
         // Remplace la grille pour ce test
-        model = object : SchellingModel(5, 0.5, 0.0) {
-            override fun getGrid(): Array<IntArray> = mockGrid
-            fun isSatisfied(x: Int, y: Int): Boolean = super.isSatisfied(x, y)
+        model = object : SchellingModel(6, 0.5, 0.0) {
+            init {
+                grid = mockGrid
+            }
+            override fun isSatisfied(x: Int, y: Int): Boolean = super.isSatisfied(x, y)
         }
         // La cellule centrale ne doit pas être satisfaite
         assertFalse(model.isSatisfied(2, 2))
@@ -65,7 +70,7 @@ class SchellingModelTest {
     @Test
     fun `test group counting`() {
         // Simule une grille avec deux groupes distincts
-        val mockGrid = Array(5) { IntArray(5) }
+        val mockGrid = Array(6) { IntArray(6) }
         for (i in 0 until 3) {
             for (j in 0 until 3) {
                 mockGrid[i][j] = 1 // Groupe en haut à gauche
@@ -77,9 +82,10 @@ class SchellingModelTest {
             }
         }
         // Remplace la grille pour ce test
-        model = object : SchellingModel(5, 0.5, 0.0) {
-            override fun getGrid(): Array<IntArray> = mockGrid
-            override fun countGroups(): Int = super.countGroups()
+        model = object : SchellingModel(6, 0.5, 0.0) {
+            init {
+                grid = mockGrid
+            }
         }
         // Doit trouver 2 groupes
         assertEquals(2, model.countGroups())
