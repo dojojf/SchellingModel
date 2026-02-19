@@ -13,7 +13,7 @@ Pour plus de précision, un article de "Pour la science" : https://www.cristal.u
 Pour tester, un simulateur en ligne : https://courses.cs.duke.edu/spring21/compsci308/assign/02_simulation/nifty/mccown-schelling-model-segregation/
 
 À partir du code généré par l'IA (voir le prompt) et corrigé manuellement "à l'arrache" plusieurs exercices sont possibles (sur le modèle uniquement).  
-Dans IntelliJ, IL faut importer le projet à partir de sources existantes et bien mettre dans les paramètres, pour le build Grdale, le jdk 17 (il l'installera si nécessaire).
+***Note : dans IntelliJ, IL faut importer le projet à partir de sources existantes et bien mettre dans les paramètres, pour le build Gradle, le jdk 17 (il l'installera si nécessaire).***
 
 ## Échauffement
 - implémenter le décompte des groupes afin de permettre de lancer plusieurs simulations pour avoir des statistiques précises (histogrammes) du phénomène de regroupement et à partir de quels seuils le comportement change et si ce changement est brusque (discontinuité).
@@ -27,13 +27,13 @@ Modifier le code pour :
 - prendre en compte n communautés
 - chaque communauté peut avoir son propre seuil de satisfaction
 - les règles de satisfaction deviennent :
-- des fonctions toujours binaires (satisfait/pas satisfait) mais plus complexes, par ex : au moins 1 étranger, mais pas plus de 80%
-- des fonctions non-binaires => un taux de satisfaction. Chaque entité ne bouge que si elle trouve un meilleur taux, mais ne cherche pas le 100%
+   - des fonctions toujours binaires (satisfait/pas satisfait) mais plus complexes, par ex : au moins 1 étranger, mais pas plus de 80%
+   - des fonctions non-binaires => un taux de satisfaction. Chaque entité ne bouge que si elle trouve un meilleur taux, mais ne cherche pas le 100%
 
 ## Codage
 C'est un simulateur donc on devrait optimiser (parallélisation) et faire un système de batch pour lancer des simulations en faisant varier 1 ou plusieurs paramètres sur des milliers de valeurs.
 
-Questions :
+## Questions :
 - qu'est-ce qu'un test d'intégration dans le contexte d'un code de simulation dont le résultat peut être inattendu ?
 - comment s'assurer que le résultat n'est pas un artefact du calcul informatique ?
 - le générateur aléatoire peut-il avoir un biais si l'on s'en sert pour des coordonnées ?
