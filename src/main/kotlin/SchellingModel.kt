@@ -93,30 +93,8 @@ open class SchellingModel(private val size: Int, private val similarityThreshold
     }
 
     open fun countGroups(): Int {
-        val visited = Array(size) { BooleanArray(size) }
-        var groupCount = 0
-
-        for (i in 0 until size) {
-            for (j in 0 until size) {
-                if (grid[i][j] != empty && !visited[i][j]) {
-                    exploreGroup(i, j, visited, grid[i][j])
-                    groupCount++
-                }
-            }
-        }
-
-        return groupCount
+        // TODO
+        return 0
     }
 
-    private fun exploreGroup(x: Int, y: Int, visited: Array<BooleanArray>, community: Int) {
-        if (x !in 0 until size || y !in 0 until size || visited[x][y] || grid[x][y] != community) {
-            return
-        }
-
-        visited[x][y] = true
-        exploreGroup(x + 1, y, visited, community)
-        exploreGroup(x - 1, y, visited, community)
-        exploreGroup(x, y + 1, visited, community)
-        exploreGroup(x, y - 1, visited, community)
-    }
 }

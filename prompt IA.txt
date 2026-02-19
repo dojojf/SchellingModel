@@ -1,0 +1,15 @@
+Peux-tu me générer un code en Kotlin avec la bibliothèque JavaFx qui implémente un modèle de ségrégation de Schelling.
+Voilà les points clés :
+- la grille sera un carré de taille n
+- il y a 2 commmunautés de même taille réparties aléatoirement sur les cases de la grille
+- on libère aléatoirement un pourcentage (par défaut 20%) de cases
+- une itération consiste à bouger un élément (une case non vide) qui n'st pas satisfait vers une case libre : 2 options pour le choix de la case libre ; au hasard ou au hasard parmi celles qui augmentent la satisfaction
+- on répéte l'itération jusqu'a convergence, où toutes les cases occupées sont satisfaites, ou si après un nombre max
+- le résultat sera la grille résultante des itérations, leurs nombre ou max +1 si non convergence et le nombre de groupes
+- un groupe sera toutes les cases d'une même commmunautés qui se touchent orthogonalement
+- la régle de satisfaction sera un pourcentage minimum de voisins de la même communauté
+- faire une claire séparation entre le code graphique qui affiche le résultat et le moteur de calcul
+- ne pas oublier les tests unitaires
+- enfin on veut pouvoir lancer un grand nombre de simulations avec les paramètres fixés pour obtenir un histogramme qui donne le pourcentage de grilles qui convergent vers 2, 3 ... 10 grooupes, entre 11 et 20 groupes, pkus de 20 groupes et ne convergent pas
+- ne pas oublier le fichier gradle, la version de gradle à utiliser et comment configurer intellij pour que ça marche
+

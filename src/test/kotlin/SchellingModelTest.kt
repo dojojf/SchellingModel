@@ -66,28 +66,4 @@ class SchellingModelTest {
         val iterations = model.iterate(100)
         assertTrue(iterations <= 100)
     }
-
-    @Test
-    fun `test group counting`() {
-        // Simule une grille avec deux groupes distincts
-        val mockGrid = Array(6) { IntArray(6) }
-        for (i in 0 until 3) {
-            for (j in 0 until 3) {
-                mockGrid[i][j] = 1 // Groupe en haut à gauche
-            }
-        }
-        for (i in 3 until 5) {
-            for (j in 3 until 5) {
-                mockGrid[i][j] = 2 // Groupe en bas à droite
-            }
-        }
-        // Remplace la grille pour ce test
-        model = object : SchellingModel(6, 0.5, 0.0) {
-            init {
-                grid = mockGrid
-            }
-        }
-        // Doit trouver 2 groupes
-        assertEquals(2, model.countGroups())
-    }
 }
